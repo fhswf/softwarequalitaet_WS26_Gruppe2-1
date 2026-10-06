@@ -1,19 +1,63 @@
 # VRGA, NSBG
 
-''' Aufgabe 1 (Stellen, die das  Verständnis des Codes erschweren)
-
-Die vielen globalen Variablen machen den Code etwas unübersichtlich.
-
-Die Aufgaben werden als Listen gespeichert, dadurch ist nicht sofort klar was task[0], task[1] bedeutet.
-
-process_tasks() verändert zufällig eine Aufgabe, gibt aber immer False zurück.
-
-Die Funktion calculate_task_average() berechnet den Durchschnitt der Aufgaben-IDs und nicht wirklich einen Aufgabendurchschnitt.
-
-backup_tasks wird erstellt, aber später nicht verwendet.
-
-Die Datumswerte werden als Strings gespeichert und verglichen.
 '''
+Aufgabe 1 (Stellen, die das  Verständnis des Codes erschweren)
+
+    Die vielen globalen Variablen machen den Code etwas unübersichtlich.
+
+    Die Aufgaben werden als Listen gespeichert, dadurch ist nicht sofort klar was task[0], task[1] bedeutet.
+
+    process_tasks() verändert zufällig eine Aufgabe, gibt aber immer False zurück.
+
+    Die Funktion calculate_task_average() berechnet den Durchschnitt der Aufgaben-IDs und nicht wirklich einen Aufgabendurchschnitt.
+
+    backup_tasks wird erstellt, aber später nicht verwendet.
+
+    Die Datumswerte werden als Strings gespeichert und verglichen.
+
+
+Aufgabe 2  
+    Verbesserungen
+
+        Die Aufgaben könnten statt als Listen besser als Dictionary oder eigene Klasse gespeichert werden.
+
+        Weniger globale Variablen verwenden damit der Code übersichtlicher und leichter zu testen ist.
+
+        Die Funktionen könnten besser dokumentiert werden.
+
+        Die zufällige Vergabe der Aufgaben-ID kann zu Problemen führen da IDs doppelt vorkommen können.
+
+        Bei leeren tasks kann process_tasks() einen Fehler verursachen.
+
+        Die Datumswerte besser als echte Datumsobjekte speichern und nicht als Strings.
+
+        Unbenutzte bzw. unnötige Sachen wie backup_tasks oder TODO entfernen.
+
+        Bessere Namen für manche Variablen verwenden damit der Code verständlicher wird.
+
+        Mehr Fehlerbehandlung einbauen z.B. wenn eine Aufgabe nicht existiert.
+
+
+    Positiv:
+
+        Der Code ist in mehrere Funktionen aufgeteilt und dadurch grundsätzlich übersichtlich.
+
+        Die Funktionen haben meistens verständliche Namen.
+
+        Die Aufgabenverwaltung ist grundsätzlich einfach aufgebaut und leicht nachzuvollziehen.
+
+
+    Negativ:
+
+        Viele globale Variablen machen den Code schwerer wartbar.
+
+        Die Aufgaben als Listen zu speichern macht den Code weniger verständlich.
+
+        Es gibt wenig Dokumentation und keine Kommentare bei den meisten Funktionen.
+
+        Teilweise können Fehler auftreten z.B. bei leeren Aufgaben.
+'''
+
 
 
 

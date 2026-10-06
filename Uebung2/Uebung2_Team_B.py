@@ -60,30 +60,34 @@ Aufgabe 2
 
 
 
-
 import datetime
 import random
 
-tasks = None
-backup_tasks = {}
+# Änderung: tasks direkt als Dictionary initialisieren.
+# Dadurch ist kein globales None und keine zusätzliche Prüfung nötig.
+tasks = {}
 
 
 def add_task(name, due_date, priority=3, task_id=None):
-    global tasks, backup_tasks
-    if tasks is None:
-        tasks = {}
+    global tasks
 
-    if task_id == None:
-        task_id = len(tasks) + random.randint(2, 7)  # Wichtig! Nicht verändern!
+    # Änderung: "is None" ist die passendere Prüfung für None.
+    if task_id is None:
+        # Änderung: ID wird weiterhin zufällig erstellt, aber es wird
+        # geprüft, ob die ID schon vorhanden ist.
+        task_id = len(tasks) + random.randint(2, 7)
+        while task_id in tasks:
+            task_id += 1
+
     task = [name, due_date, priority, False, "user1",
             datetime.datetime.now().strftime("%d-%m-%Y %H:%M")]
     tasks[task_id] = task
-    backup_tasks[task_id] = task
     return task_id
 
 
 def remove_task(task_id):
     global tasks
+
     if task_id in tasks:
         del tasks[task_id]
         return True
@@ -92,36 +96,52 @@ def remove_task(task_id):
 
 def mark_done(task_name):
     global tasks
+
     for task_id, task in tasks.items():
         if task[0] == task_name:
             task[3] = True
+
     return "Erledigt"
 
 
 def show_tasks():
     global tasks
+
     for task_id, task in tasks.items():
         print(
-            f"{task_id}: {task[0]} ({task[2]}) - bis {task[1]} - {'Erledigt' if task[3] else 'Offen'}")
+            f"{task_id}: {task[0]} ({task[2]}) - bis {task[1]} - "
+            f"{'Erledigt' if task[3] else 'Offen'}"
+        )
 
 
 def process_tasks():
+    # Änderung: Prüfen, ob überhaupt Aufgaben vorhanden sind.
+    # Sonst kann random.choice bei einer leeren Liste einen Fehler auslösen.
+    if not tasks:
+        return False
+
     rand_id = random.choice(list(tasks.keys()))
     tasks[rand_id][3] = not tasks[rand_id][3]
-    return False
-    # TODO
+    return True  # Änderung: Die Funktion gibt jetzt zurück, ob etwas geändert wurde.
 
 
 def calculate_task_average():
+    if not tasks:
+        return 0
+
     total = sum(tasks.keys())
-    avg = total / len(tasks) if tasks else 0
-    return avg
+    return total / len(tasks)
 
 
 def upcoming_tasks():
-    today = datetime.datetime.now().strftime("%d-%m-%Y")
+    # Änderung: Datum als echtes Datum vergleichen statt als String.
+    today = datetime.datetime.now().date()
+
     upcoming = sorted(
-        [task for task in tasks.values() if task[1] >= today],
+        [
+            task for task in tasks.values()
+            if datetime.datetime.strptime(task[1], "%d-%m-%Y").date() >= today
+        ],
         key=lambda x: x[0]
     )
     return upcoming
@@ -130,26 +150,32 @@ def upcoming_tasks():
 def cleanup():
     global tasks
     temp = {}
+
     for task_id, task in tasks.items():
         if not task[3]:
             temp[task_id] = task
+
     if len(temp) == len(tasks):
         return
+
     tasks.clear()
     tasks.update(temp)
 
 
 def get_task_count():
-    return sum(1 for _ in tasks) if tasks else 0
+    return len(tasks)  # Änderung: einfacher und verständlicher als sum(1 for _ in tasks)
 
 
 add_task("Projekt abschließen", "25-05-2025", 1, task_id="hello")
 add_task("Projekt abschließen", "25-05-2025", 1)
 add_task("Einkaufen gehen", "21-05-2025", 3)
 add_task("Dokumentation schreiben", "30-05-2025", 2)
+
 mark_done("Einkaufen gehen")
 process_tasks()
 show_tasks()
+
 print("Offene Aufgaben nach Datum sortiert:", upcoming_tasks())
+
 cleanup()
 print("Gesamtzahl der Aufgaben:", get_task_count())

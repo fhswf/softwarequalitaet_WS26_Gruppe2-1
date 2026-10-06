@@ -1,3 +1,22 @@
+# VRGA, NSBG
+
+''' Aufgabe 1 (Stellen, die das  Verständnis des Codes erschweren)
+
+Die vielen globalen Variablen machen den Code etwas unübersichtlich.
+
+Die Aufgaben werden als Listen gespeichert, dadurch ist nicht sofort klar was task[0], task[1] bedeutet.
+
+process_tasks() verändert zufällig eine Aufgabe, gibt aber immer False zurück.
+
+Die Funktion calculate_task_average() berechnet den Durchschnitt der Aufgaben-IDs und nicht wirklich einen Aufgabendurchschnitt.
+
+backup_tasks wird erstellt, aber später nicht verwendet.
+
+Die Datumswerte werden als Strings gespeichert und verglichen.
+'''
+
+
+
 import datetime
 import random
 

@@ -1,5 +1,5 @@
 """
-Teilnehmer: CSKK, BNWK, NSBG VRGA
+Teilnehmer: CSKK, BNWK, NSBG, VRGA
 
 Aufgabe 1 – Funktionen des Codes:
 Einfache Aufgabenverwaltung (To-do-Liste) im Speicher:
@@ -49,6 +49,48 @@ Was das Verständnis erschwert
 - get_task_count: umständlich (sum(1 for _ in tasks) statt len(tasks))
 - Keine Docstrings, Kommentare oder Type Hints; Testaufrufe ohne
   if __name__ == "__main__" direkt im Modul
+"""
+
+"""
+Aufgabe 2 – Bewertung aus Sicht der Softwarequalität
+Positiv:
+- Kleine, überschaubare Funktionen mit je einer Aufgabe
+- Funktionsnamen größtenteils sprechend (add_task, remove_task, show_tasks)
+- Default-Parameter für priority vorhanden (Aufruf ohne Priorität möglich)
+- add_task gibt die vergebene ID zurück, remove_task meldet Erfolg als bool
+- Lesbare Ausgabe per f-String in show_tasks
+- Nur Standardbibliothek, keine externen Abhängigkeiten
+
+Negativ:
+- Struktur:      globaler Zustand, Datenmodell als Liste, Testcode im Modul
+- Lesbarkeit:    Magic-Indizes und Magic Values ("user1", Datumsformat);
+                 Prioritäts-Skala undokumentiert, Default 3 als Magic Number
+- Dokumentation: keine Docstrings, keine Type Hints, TODO ohne Inhalt
+- Robustheit:    Absturz bei leerer/uninitialisierter Liste, keine
+                 Eingabeprüfung, ID-Kollisionen, String-Datumsvergleich
+- Fehlervermeidung: Rückgabewerte ohne Aussage (mark_done, process_tasks)
+- Wartbarkeit:   Änderung der Listenreihenfolge zerstört alle Funktionen,
+                 backup_tasks und process_tasks ohne erkennbaren Zweck
+
+Mögliche Verbesserungen:
+1.  tasks direkt als {} initialisieren, überflüssige global entfernen
+2.  Aufgabe als dict/dataclass mit benannten Feldern statt Liste
+3.  Konstanten statt Magic Values (DATE_FORMAT, DEFAULT_USER,
+    DEFAULT_PRIORITY), Prioritäts-Skala dokumentieren, Benutzer
+    als Parameter übergeben
+4.  ID-Vergabe zentral in add_task, Kollisionen verhindern (die Zeile mit
+    random.randint bleibt laut Vorgabe unverändert)
+5.  Fälligkeitsdatum als datetime.date speichern und vergleichen
+6.  Eingaben validieren (Priorität 1-3, Datumsformat) mit klaren Fehlern
+7.  mark_done über ID statt Name, Rückgabe True/False
+8.  upcoming_tasks: nur offene Aufgaben ab heute, nach Datum sortiert
+9.  calculate_task_average fachlich sinnvoll machen (z. B. die Durchschnittliche-Priorität)
+10. process_tasks entfernen oder Zweck klar definieren (TODO auflösen)
+11. backup_tasks entfernen oder als echte Kopie (copy.deepcopy) pflegen
+12. cleanup umbenennen (remove_done_tasks) und vereinfachen
+13. get_task_count mit len(tasks) umsetzen
+14. Docstrings und Type Hints für alle Funktionen
+15. Testaufrufe in main() mit if __name__ == "__main__" kapseln
 """
 
 import datetime

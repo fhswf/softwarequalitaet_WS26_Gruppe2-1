@@ -1,3 +1,56 @@
+"""
+Teilnehmer: CSKK, BNWK, NSBG VRGA
+
+Aufgabe 1 – Funktionen des Codes:
+Einfache Aufgabenverwaltung (To-do-Liste) im Speicher:
+- add_task:               legt eine Aufgabe an (Name, Fälligkeit, Priorität,
+                          erledigt-Flag, Benutzer, Erstellzeitpunkt) und gibt die ID zurück
+- remove_task:            löscht eine Aufgabe per ID (True/False)
+- mark_done:              markiert Aufgaben anhand ihres Namens als erledigt
+- show_tasks:             gibt alle Aufgaben auf der Konsole aus
+- process_tasks:          schaltet bei einer ZUFÄLLIGEN Aufgabe den Status um
+- calculate_task_average: berechnet den Durchschnitt der Aufgaben-IDs
+- upcoming_tasks:         soll anstehende Aufgaben liefern (sortiert)
+- cleanup:                entfernt alle erledigten Aufgaben
+- get_task_count:         liefert die Anzahl der Aufgaben
+
+Was das Verständnis erschwert
+- Aufgabe als Liste gespeichert, Zugriff nur über Positionen (task[0],
+  task[3] ...): ohne Blick in add_task ist unklar, dass z. B. task[3]
+  der Erledigt-Status ist
+- Benutzer ist fest "user1" (hart codiert): kann nicht übergeben werden,
+  das Feld ist damit für alle Aufgaben identisch und ohne Aussagekraft
+- ID-Vergabe len(tasks) + random.randint(2, 7): nicht nachvollziehbar,
+  nicht reproduzierbar; da len(tasks) nur um 1 wächst, überschneidet sich
+  der Bereich mit bereits vergebenen IDs -> hohe Gefahr, dass eine neue
+  Aufgabe still eine bestehende überschreibt
+- task_id kann zusätzlich von außen übergeben werden: ID-Vergabe ist damit
+  nicht an einer Stelle zentralisiert, eine vorhandene ID überschreibt still
+  eine bestehende Aufgabe, gemischte ID-Typen möglich ("hello" neben int)
+- tasks wird nicht direkt bei der Deklaration (tasks = None) als leeres
+  Dict angelegt, sondern erst "lazy" in add_task -> remove_task, show_tasks,
+  calculate_task_average usw. stürzen ab, wenn vorher kein add_task lief
+- global-Anweisungen inkonsistent und großteils unnötig: nur in add_task
+  (tasks = {}) wirklich nötig, in remove_task/mark_done/show_tasks/cleanup
+  wirkungslos -> täuscht eine Neuzuweisung vor
+- backup_tasks: Zweck unklar, kein echtes Backup (gleiche Listen-Referenz,
+  wird bei remove_task nicht angepasst), wird nirgends gelesen
+- process_tasks: Zweck unklar, zufälliges Umschalten, gibt immer False zurück,
+  Absturz bei leerer Liste; "# TODO" steht ohne Beschreibung da (unklar,
+  was noch zu tun ist) und steht zudem erst hinter dem return
+- calculate_task_average: Durchschnitt von IDs ist fachlich sinnlos und
+  stürzt bei String-IDs ab (TypeError)
+- upcoming_tasks: vergleicht Datum als String "TT-MM-JJJJ" (falsch!),
+  sortiert nach Name statt Datum, enthält auch erledigte Aufgaben, obwohl
+  die Ausgabe "Offene Aufgaben nach Datum sortiert" behauptet
+- mark_done: arbeitet über den Namen (markiert alle Duplikate) und gibt
+  immer "Erledigt" zurück, auch wenn keine Aufgabe gefunden wurde
+- cleanup: Name verrät nicht, was gelöscht wird; Sonderfall-return unnötig
+- get_task_count: umständlich (sum(1 for _ in tasks) statt len(tasks))
+- Keine Docstrings, Kommentare oder Type Hints; Testaufrufe ohne
+  if __name__ == "__main__" direkt im Modul
+"""
+
 import datetime
 import random
 

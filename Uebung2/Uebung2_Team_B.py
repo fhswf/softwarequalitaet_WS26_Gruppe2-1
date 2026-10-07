@@ -170,12 +170,14 @@ def remove_task(task_id):
     return False
 
 
-def mark_done(task_name):
-    # A3: überflüssiges "global tasks" entfernt
-    for task_id, task in tasks.items():
-        if task["name"] == task_name:  # A3: benannte Felder statt Indizes
-            task["done"] = True
-    return "Erledigt"
+# A3: mark_done arbeitet über die eindeutige ID statt über den Namen
+# (Namen können doppelt vorkommen -> es wurden alle Duplikate markiert);
+# Rückgabe True/False statt immer "Erledigt", auch wenn nichts gefunden wurde
+def mark_done(task_id):
+    if task_id not in tasks:
+        return False
+    tasks[task_id]["done"] = True
+    return True
 
 
 def show_tasks():
@@ -212,42 +214,41 @@ def calculate_average_priority():
 
 def upcoming_tasks():
     # A3: due_date ist jetzt ein date -> mit date.today() statt mit einem
-    # String vergleichen (Datumsvergleich damit korrekt, Rest folgt in 3.8)
+    # String vergleichen ("TT-MM-JJJJ" als String sortiert falsch)
     today = datetime.date.today()
-    # A3: benannte Felder statt Indizes (Logik selbst wird in 3.8 korrigiert)
+    # A3: nur OFFENE Aufgaben (vorher auch erledigte), sortiert nach
+    # Fälligkeit statt nach Name; bei gleichem Datum höhere Priorität zuerst
     upcoming = sorted(
-        [task for task in tasks.values() if task["due_date"] >= today],
-        key=lambda task: task["name"]
+        [task for task in tasks.values()
+         if not task["done"] and task["due_date"] >= today],
+        key=lambda task: (task["due_date"], task["priority"])
     )
     return upcoming
 
 
-def cleanup():
-    # A3: überflüssiges "global tasks" entfernt (clear/update ändern das
-    # bestehende Dict, keine Neuzuweisung)
-    temp = {}
-    for task_id, task in tasks.items():
-        if not task["done"]:  # A3: benanntes Feld statt task[3]
-            temp[task_id] = task
-    if len(temp) == len(tasks):
-        return
-    tasks.clear()
-    tasks.update(temp)
+# A3: cleanup -> remove_done_tasks - Name sagt jetzt, was gelöscht wird;
+# Hilfs-Dict, clear/update und Sonderfall-return durch eine Liste der zu
+# löschenden IDs ersetzt; Rückgabe = Anzahl gelöschter Aufgaben
+def remove_done_tasks():
+    done_ids = [task_id for task_id, task in tasks.items() if task["done"]]
+    for task_id in done_ids:
+        del tasks[task_id]
+    return len(done_ids)
 
 
 def get_task_count():
-    return sum(1 for _ in tasks) if tasks else 0
+    return len(tasks)  # A3: len() statt sum(1 for _ in tasks) + Sonderfall
 
 
 add_task("Projekt abschließen", "25-05-2025", 1, task_id="hello")
 add_task("Projekt abschließen", "25-05-2025", 1)
-add_task("Einkaufen gehen", "21-05-2025", 3)
-# A3: ID merken, damit toggle_task gezielt aufgerufen werden kann
+# A3: IDs merken, damit mark_done/toggle_task gezielt aufgerufen werden können
+shopping_id = add_task("Einkaufen gehen", "21-05-2025", 3)
 doc_id = add_task("Dokumentation schreiben", "30-05-2025", 2)
-mark_done("Einkaufen gehen")
+mark_done(shopping_id)  # A3: über ID statt Name
 toggle_task(doc_id)  # A3: ersetzt process_tasks()
 show_tasks()
 print("Durchschnittliche Priorität:", calculate_average_priority())  # A3
 print("Offene Aufgaben nach Datum sortiert:", upcoming_tasks())
-cleanup()
+print("Gelöschte erledigte Aufgaben:", remove_done_tasks())  # A3: umbenannt
 print("Gesamtzahl der Aufgaben:", get_task_count())

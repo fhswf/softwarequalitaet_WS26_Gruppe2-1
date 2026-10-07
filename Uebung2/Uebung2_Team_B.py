@@ -98,16 +98,16 @@ Mögliche Verbesserungen:
 import datetime
 import random
 
-tasks = None
+# A3: tasks direkt als leeres Dict initialisiert (statt None + Lazy-Init in
+# add_task) -> alle Funktionen funktionieren auch ohne vorheriges add_task
+tasks = {}
 backup_tasks = {}
 
 
 def add_task(name, due_date, priority=3, task_id=None):
-    global tasks, backup_tasks
-    if tasks is None:
-        tasks = {}
-
-    if task_id == None:
+    # A3: "global" entfernt - tasks/backup_tasks werden nur verändert,
+    # nicht neu zugewiesen; Lazy-Init entfällt (siehe oben)
+    if task_id is None:  # A3: "is None" statt "== None" (PEP 8)
         task_id = len(tasks) + random.randint(2, 7)  # Wichtig! Nicht verändern!
     task = [name, due_date, priority, False, "user1",
             datetime.datetime.now().strftime("%d-%m-%Y %H:%M")]
@@ -117,7 +117,7 @@ def add_task(name, due_date, priority=3, task_id=None):
 
 
 def remove_task(task_id):
-    global tasks
+    # A3: überflüssiges "global tasks" entfernt
     if task_id in tasks:
         del tasks[task_id]
         return True
@@ -125,7 +125,7 @@ def remove_task(task_id):
 
 
 def mark_done(task_name):
-    global tasks
+    # A3: überflüssiges "global tasks" entfernt
     for task_id, task in tasks.items():
         if task[0] == task_name:
             task[3] = True
@@ -133,7 +133,7 @@ def mark_done(task_name):
 
 
 def show_tasks():
-    global tasks
+    # A3: überflüssiges "global tasks" entfernt
     for task_id, task in tasks.items():
         print(
             f"{task_id}: {task[0]} ({task[2]}) - bis {task[1]} - {'Erledigt' if task[3] else 'Offen'}")
@@ -162,7 +162,8 @@ def upcoming_tasks():
 
 
 def cleanup():
-    global tasks
+    # A3: überflüssiges "global tasks" entfernt (clear/update ändern das
+    # bestehende Dict, keine Neuzuweisung)
     temp = {}
     for task_id, task in tasks.items():
         if not task[3]:

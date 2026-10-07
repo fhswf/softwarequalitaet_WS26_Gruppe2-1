@@ -49,6 +49,8 @@ Was das Verständnis erschwert
 - get_task_count: umständlich (sum(1 for _ in tasks) statt len(tasks))
 - Keine Docstrings, Kommentare oder Type Hints; Testaufrufe ohne
   if __name__ == "__main__" direkt im Modul
+- Der Docstring Kommentar '# Wichtig! Nicht verändern!' ohne Beschreibung/
+  Begründung ist irreführend und unübersichtlich
 """
 
 """

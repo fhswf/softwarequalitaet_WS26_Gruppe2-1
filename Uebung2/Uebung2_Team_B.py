@@ -119,8 +119,16 @@ def add_task(name, due_date, priority=DEFAULT_PRIORITY, task_id=None,
     # nicht neu zugewiesen; Lazy-Init entfällt (siehe oben)
     if task_id is None:  # A3: "is None" statt "== None" (PEP 8)
         task_id = len(tasks) + random.randint(2, 7)  # Wichtig! Nicht verändern!
-    task = [name, due_date, priority, False, user,
-            datetime.datetime.now().strftime(DATETIME_FORMAT)]  # A3: Konstanten
+    # A3: Aufgabe als dict mit benannten Feldern statt Liste -> Zugriff über
+    # task["done"] statt task[3], Reihenfolge der Felder spielt keine Rolle mehr
+    task = {
+        "name": name,
+        "due_date": due_date,
+        "priority": priority,
+        "done": False,
+        "user": user,
+        "created_at": datetime.datetime.now().strftime(DATETIME_FORMAT),  # A3: Konstante
+    }
     tasks[task_id] = task
     backup_tasks[task_id] = task
     return task_id
@@ -137,21 +145,23 @@ def remove_task(task_id):
 def mark_done(task_name):
     # A3: überflüssiges "global tasks" entfernt
     for task_id, task in tasks.items():
-        if task[0] == task_name:
-            task[3] = True
+        if task["name"] == task_name:  # A3: benannte Felder statt Indizes
+            task["done"] = True
     return "Erledigt"
 
 
 def show_tasks():
     # A3: überflüssiges "global tasks" entfernt
     for task_id, task in tasks.items():
-        print(
-            f"{task_id}: {task[0]} ({task[2]}) - bis {task[1]} - {'Erledigt' if task[3] else 'Offen'}")
+        # A3: benannte Felder statt Indizes, Status vorab berechnet (lesbarer)
+        status = "Erledigt" if task["done"] else "Offen"
+        print(f"{task_id}: {task['name']} ({task['priority']}) - "
+              f"bis {task['due_date']} - {status}")
 
 
 def process_tasks():
     rand_id = random.choice(list(tasks.keys()))
-    tasks[rand_id][3] = not tasks[rand_id][3]
+    tasks[rand_id]["done"] = not tasks[rand_id]["done"]  # A3: benanntes Feld
     return False
     # TODO
 
@@ -164,9 +174,10 @@ def calculate_task_average():
 
 def upcoming_tasks():
     today = datetime.datetime.now().strftime(DATE_FORMAT)  # A3: Konstante
+    # A3: benannte Felder statt Indizes (Logik selbst wird in 3.8 korrigiert)
     upcoming = sorted(
-        [task for task in tasks.values() if task[1] >= today],
-        key=lambda x: x[0]
+        [task for task in tasks.values() if task["due_date"] >= today],
+        key=lambda task: task["name"]
     )
     return upcoming
 
@@ -176,7 +187,7 @@ def cleanup():
     # bestehende Dict, keine Neuzuweisung)
     temp = {}
     for task_id, task in tasks.items():
-        if not task[3]:
+        if not task["done"]:  # A3: benanntes Feld statt task[3]
             temp[task_id] = task
     if len(temp) == len(tasks):
         return

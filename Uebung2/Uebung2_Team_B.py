@@ -112,14 +112,16 @@ DEFAULT_PRIORITY = 2
 # A3: tasks direkt als leeres Dict initialisiert (statt None + Lazy-Init in
 # add_task) -> alle Funktionen funktionieren auch ohne vorheriges add_task
 tasks = {}
-backup_tasks = {}
+# A3: backup_tasks entfernt - wurde nirgends gelesen, war kein echtes Backup
+# (gleiche Objekt-Referenzen, Änderungen schlugen durch) und wurde bei
+# remove_task nicht gepflegt -> nur toter, irreführender Code
 
 
 # A3: Default-Priorität als Konstante, Benutzer als Parameter "user" statt
 # fest "user1" (neuer Parameter am Ende -> bestehende Aufrufe bleiben gültig)
 def add_task(name, due_date, priority=DEFAULT_PRIORITY, task_id=None,
              user=DEFAULT_USER):
-    # A3: "global" entfernt - tasks/backup_tasks werden nur verändert,
+    # A3: "global" entfernt - tasks wird nur verändert,
     # nicht neu zugewiesen; Lazy-Init entfällt (siehe oben)
 
     # A3: Eingabevalidierung vor allen anderen Schritten, damit bei
@@ -156,8 +158,7 @@ def add_task(name, due_date, priority=DEFAULT_PRIORITY, task_id=None,
         "user": user,
         "created_at": datetime.datetime.now().strftime(DATETIME_FORMAT),  # A3: Konstante
     }
-    tasks[task_id] = task
-    backup_tasks[task_id] = task
+    tasks[task_id] = task  # A3: backup_tasks entfällt (siehe oben)
     return task_id
 
 
@@ -188,17 +189,25 @@ def show_tasks():
               f"bis {due} - {status}")
 
 
-def process_tasks():
-    rand_id = random.choice(list(tasks.keys()))
-    tasks[rand_id]["done"] = not tasks[rand_id]["done"]  # A3: benanntes Feld
-    return False
-    # TODO
+# A3: process_tasks durch toggle_task ersetzt - statt eine ZUFÄLLIGE Aufgabe
+# umzuschalten (nicht nachvollziehbar, Absturz bei leerer Liste, immer
+# False, leeres TODO) wird gezielt die Aufgabe mit der übergebenen ID
+# umgeschaltet; Rückgabe zeigt, ob die Aufgabe gefunden wurde
+def toggle_task(task_id):
+    if task_id not in tasks:
+        return False
+    tasks[task_id]["done"] = not tasks[task_id]["done"]
+    return True
 
 
-def calculate_task_average():
-    total = sum(tasks.keys())
-    avg = total / len(tasks) if tasks else 0
-    return avg
+# A3: calculate_task_average -> calculate_average_priority - der
+# Durchschnitt der IDs war fachlich sinnlos (und stürzte bei String-IDs ab),
+# die durchschnittliche Priorität ist eine aussagekräftige Kennzahl
+def calculate_average_priority():
+    if not tasks:
+        return 0.0
+    total = sum(task["priority"] for task in tasks.values())
+    return total / len(tasks)
 
 
 def upcoming_tasks():
@@ -233,10 +242,12 @@ def get_task_count():
 add_task("Projekt abschließen", "25-05-2025", 1, task_id="hello")
 add_task("Projekt abschließen", "25-05-2025", 1)
 add_task("Einkaufen gehen", "21-05-2025", 3)
-add_task("Dokumentation schreiben", "30-05-2025", 2)
+# A3: ID merken, damit toggle_task gezielt aufgerufen werden kann
+doc_id = add_task("Dokumentation schreiben", "30-05-2025", 2)
 mark_done("Einkaufen gehen")
-process_tasks()
+toggle_task(doc_id)  # A3: ersetzt process_tasks()
 show_tasks()
+print("Durchschnittliche Priorität:", calculate_average_priority())  # A3
 print("Offene Aufgaben nach Datum sortiert:", upcoming_tasks())
 cleanup()
 print("Gesamtzahl der Aufgaben:", get_task_count())

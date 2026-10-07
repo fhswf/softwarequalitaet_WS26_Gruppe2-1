@@ -51,9 +51,7 @@ Was das Verständnis erschwert
   if __name__ == "__main__" direkt im Modul
 - Der Docstring Kommentar '# Wichtig! Nicht verändern!' ohne Beschreibung/
   Begründung ist irreführend und unübersichtlich
-"""
 
-"""
 Aufgabe 2 – Bewertung aus Sicht der Softwarequalität
 Positiv:
 - Kleine, überschaubare Funktionen mit je einer Aufgabe
@@ -95,6 +93,9 @@ Mögliche Verbesserungen:
 15. Testaufrufe in main() mit if __name__ == "__main__" kapseln
 """
 
+# A4: A1- und A2-Block zu EINEM Modul-Docstring zusammengefasst (Inhalt
+# unverändert) -> behebt Pylint W0105 und als Folge die 3x C0413;
+# zusätzlich Datei in uebung2_team_b.py umbenannt (behebt C0103)
 import datetime
 import random
 from typing import Any
@@ -311,3 +312,35 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+# =============================================================================
+# Aufgabe 4 – Pylint-Analyse
+# Hinweis: Als #-Kommentar statt """-Block, da ein weiterer String am
+# Dateiende selbst wieder W0105 (pointless-string-statement) auslösen würde.
+#
+# 1. Lauf (Stand nach A3, vor Korrekturen, Datei hieß noch Uebung2_Team_B.py):
+#
+# ************* Module Uebung2_Team_B
+# Uebung2_Team_B.py:1:0: C0103: Module name "Uebung2_Team_B" doesn't conform
+#   to snake_case naming style (invalid-name)
+#
+# Uebung2_Team_B.py:56:0: W0105: String statement has no effect
+#   (pointless-string-statement)
+#
+# Uebung2_Team_B.py:98:0: C0413: Import "import datetime" should be placed
+#   at the top of the module (wrong-import-position)
+# Uebung2_Team_B.py:99:0: C0413: Import "import random" should be placed
+#   at the top of the module (wrong-import-position)
+# Uebung2_Team_B.py:100:0: C0413: Import "from typing import Any" should be
+#   placed at the top of the module (wrong-import-position)
+# Your code has been rated at 9.43/10
+#
+# Korrekturen:
+# - W0105 / C0413: A1- und A2-Block zu einem Modul-Docstring zusammengefasst
+#   (Inhalt unverändert, siehe "# A4:"-Kommentar über den Imports)
+# - C0103: Datei von Uebung2_Team_B.py in uebung2_team_b.py umbenannt
+#
+# 2. Lauf (nach Korrekturen):
+# Your code has been rated at 10.00/10
+# =============================================================================

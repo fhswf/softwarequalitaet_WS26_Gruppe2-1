@@ -98,19 +98,29 @@ Mögliche Verbesserungen:
 import datetime
 import random
 
+# A3: Konstanten statt Magic Values - Formate und Defaults an einer Stelle
+DATE_FORMAT = "%d-%m-%Y"                 # Fälligkeitsdatum, z. B. "25-05-2025"
+DATETIME_FORMAT = "%d-%m-%Y %H:%M"       # Erstellzeitpunkt einer Aufgabe
+DEFAULT_USER = "user1"                   # Benutzer, falls keiner übergeben wird
+# Prioritäts-Skala: 1 = hoch, 2 = mittel, 3 = niedrig
+DEFAULT_PRIORITY = 3
+
 # A3: tasks direkt als leeres Dict initialisiert (statt None + Lazy-Init in
 # add_task) -> alle Funktionen funktionieren auch ohne vorheriges add_task
 tasks = {}
 backup_tasks = {}
 
 
-def add_task(name, due_date, priority=3, task_id=None):
+# A3: Default-Priorität als Konstante, Benutzer als Parameter "user" statt
+# fest "user1" (neuer Parameter am Ende -> bestehende Aufrufe bleiben gültig)
+def add_task(name, due_date, priority=DEFAULT_PRIORITY, task_id=None,
+             user=DEFAULT_USER):
     # A3: "global" entfernt - tasks/backup_tasks werden nur verändert,
     # nicht neu zugewiesen; Lazy-Init entfällt (siehe oben)
     if task_id is None:  # A3: "is None" statt "== None" (PEP 8)
         task_id = len(tasks) + random.randint(2, 7)  # Wichtig! Nicht verändern!
-    task = [name, due_date, priority, False, "user1",
-            datetime.datetime.now().strftime("%d-%m-%Y %H:%M")]
+    task = [name, due_date, priority, False, user,
+            datetime.datetime.now().strftime(DATETIME_FORMAT)]  # A3: Konstanten
     tasks[task_id] = task
     backup_tasks[task_id] = task
     return task_id
@@ -153,7 +163,7 @@ def calculate_task_average():
 
 
 def upcoming_tasks():
-    today = datetime.datetime.now().strftime("%d-%m-%Y")
+    today = datetime.datetime.now().strftime(DATE_FORMAT)  # A3: Konstante
     upcoming = sorted(
         [task for task in tasks.values() if task[1] >= today],
         key=lambda x: x[0]

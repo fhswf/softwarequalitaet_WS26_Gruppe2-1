@@ -97,6 +97,12 @@ Mögliche Verbesserungen:
 
 import datetime
 import random
+from typing import Any
+
+# A3: Typ-Aliase für Type Hints - eine Aufgabe ist ein dict mit benannten
+# Feldern, IDs sind int (automatisch vergeben) oder str (von außen übergeben)
+TaskId = int | str
+Task = dict[str, Any]
 
 # A3: Konstanten statt Magic Values - Formate und Defaults an einer Stelle
 DATE_FORMAT = "%d-%m-%Y"                 # Fälligkeitsdatum, z. B. "25-05-2025"
@@ -111,7 +117,7 @@ DEFAULT_PRIORITY = 2
 
 # A3: tasks direkt als leeres Dict initialisiert (statt None + Lazy-Init in
 # add_task) -> alle Funktionen funktionieren auch ohne vorheriges add_task
-tasks = {}
+tasks: dict[TaskId, Task] = {}
 # A3: backup_tasks entfernt - wurde nirgends gelesen, war kein echtes Backup
 # (gleiche Objekt-Referenzen, Änderungen schlugen durch) und wurde bei
 # remove_task nicht gepflegt -> nur toter, irreführender Code
@@ -119,8 +125,25 @@ tasks = {}
 
 # A3: Default-Priorität als Konstante, Benutzer als Parameter "user" statt
 # fest "user1" (neuer Parameter am Ende -> bestehende Aufrufe bleiben gültig)
-def add_task(name, due_date, priority=DEFAULT_PRIORITY, task_id=None,
-             user=DEFAULT_USER):
+# A3: Docstrings und Type Hints für alle Funktionen ergänzt
+def add_task(name: str, due_date: str, priority: int = DEFAULT_PRIORITY,
+             task_id: TaskId | None = None, user: str = DEFAULT_USER) -> TaskId:
+    """Legt eine neue, offene Aufgabe an.
+
+    Args:
+        name: Bezeichnung der Aufgabe.
+        due_date: Fälligkeitsdatum im Format TT-MM-JJJJ.
+        priority: 1 = hoch, 2 = mittel, 3 = niedrig.
+        task_id: Optionale eigene ID; ohne Angabe wird eine freie ID vergeben.
+        user: Benutzer, dem die Aufgabe gehört.
+
+    Returns:
+        Die ID der angelegten Aufgabe.
+
+    Raises:
+        ValueError: Bei ungültigem Datum, ungültiger Priorität oder
+            bereits vergebener task_id.
+    """
     # A3: "global" entfernt - tasks wird nur verändert,
     # nicht neu zugewiesen; Lazy-Init entfällt (siehe oben)
 
@@ -162,7 +185,8 @@ def add_task(name, due_date, priority=DEFAULT_PRIORITY, task_id=None,
     return task_id
 
 
-def remove_task(task_id):
+def remove_task(task_id: TaskId) -> bool:
+    """Löscht die Aufgabe mit der ID; False, wenn die ID unbekannt ist."""
     # A3: überflüssiges "global tasks" entfernt
     if task_id in tasks:
         del tasks[task_id]
@@ -173,14 +197,16 @@ def remove_task(task_id):
 # A3: mark_done arbeitet über die eindeutige ID statt über den Namen
 # (Namen können doppelt vorkommen -> es wurden alle Duplikate markiert);
 # Rückgabe True/False statt immer "Erledigt", auch wenn nichts gefunden wurde
-def mark_done(task_id):
+def mark_done(task_id: TaskId) -> bool:
+    """Markiert die Aufgabe als erledigt; False, wenn die ID unbekannt ist."""
     if task_id not in tasks:
         return False
     tasks[task_id]["done"] = True
     return True
 
 
-def show_tasks():
+def show_tasks() -> None:
+    """Gibt alle Aufgaben mit Priorität, Fälligkeit und Status aus."""
     # A3: überflüssiges "global tasks" entfernt
     for task_id, task in tasks.items():
         # A3: benannte Felder statt Indizes, Status vorab berechnet (lesbarer)
@@ -195,7 +221,8 @@ def show_tasks():
 # umzuschalten (nicht nachvollziehbar, Absturz bei leerer Liste, immer
 # False, leeres TODO) wird gezielt die Aufgabe mit der übergebenen ID
 # umgeschaltet; Rückgabe zeigt, ob die Aufgabe gefunden wurde
-def toggle_task(task_id):
+def toggle_task(task_id: TaskId) -> bool:
+    """Schaltet offen/erledigt um; False, wenn die ID unbekannt ist."""
     if task_id not in tasks:
         return False
     tasks[task_id]["done"] = not tasks[task_id]["done"]
@@ -205,14 +232,16 @@ def toggle_task(task_id):
 # A3: calculate_task_average -> calculate_average_priority - der
 # Durchschnitt der IDs war fachlich sinnlos (und stürzte bei String-IDs ab),
 # die durchschnittliche Priorität ist eine aussagekräftige Kennzahl
-def calculate_average_priority():
+def calculate_average_priority() -> float:
+    """Liefert die durchschnittliche Priorität aller Aufgaben (0.0 wenn leer)."""
     if not tasks:
         return 0.0
     total = sum(task["priority"] for task in tasks.values())
     return total / len(tasks)
 
 
-def upcoming_tasks():
+def upcoming_tasks() -> list[Task]:
+    """Liefert offene Aufgaben ab heute, sortiert nach Fälligkeit und Priorität."""
     # A3: due_date ist jetzt ein date -> mit date.today() statt mit einem
     # String vergleichen ("TT-MM-JJJJ" als String sortiert falsch)
     today = datetime.date.today()
@@ -229,26 +258,56 @@ def upcoming_tasks():
 # A3: cleanup -> remove_done_tasks - Name sagt jetzt, was gelöscht wird;
 # Hilfs-Dict, clear/update und Sonderfall-return durch eine Liste der zu
 # löschenden IDs ersetzt; Rückgabe = Anzahl gelöschter Aufgaben
-def remove_done_tasks():
+def remove_done_tasks() -> int:
+    """Löscht alle erledigten Aufgaben und liefert deren Anzahl."""
     done_ids = [task_id for task_id, task in tasks.items() if task["done"]]
     for task_id in done_ids:
         del tasks[task_id]
     return len(done_ids)
 
 
-def get_task_count():
+def get_task_count() -> int:
+    """Liefert die Anzahl aller Aufgaben."""
     return len(tasks)  # A3: len() statt sum(1 for _ in tasks) + Sonderfall
 
 
-add_task("Projekt abschließen", "25-05-2025", 1, task_id="hello")
-add_task("Projekt abschließen", "25-05-2025", 1)
-# A3: IDs merken, damit mark_done/toggle_task gezielt aufgerufen werden können
-shopping_id = add_task("Einkaufen gehen", "21-05-2025", 3)
-doc_id = add_task("Dokumentation schreiben", "30-05-2025", 2)
-mark_done(shopping_id)  # A3: über ID statt Name
-toggle_task(doc_id)  # A3: ersetzt process_tasks()
-show_tasks()
-print("Durchschnittliche Priorität:", calculate_average_priority())  # A3
-print("Offene Aufgaben nach Datum sortiert:", upcoming_tasks())
-print("Gelöschte erledigte Aufgaben:", remove_done_tasks())  # A3: umbenannt
-print("Gesamtzahl der Aufgaben:", get_task_count())
+def days_from_today(days: int) -> str:
+    """Liefert das Datum in `days` Tagen im Format TT-MM-JJJJ."""
+    # A3: Hilfsfunktion für die Demo - relative Daten, damit upcoming_tasks
+    # unabhängig vom Ausführungstag immer etwas anzeigt
+    return (datetime.date.today() + datetime.timedelta(days=days)).strftime(DATE_FORMAT)
+
+
+def main() -> None:
+    """Demonstriert die Aufgabenverwaltung mit Beispieldaten."""
+    # A3: Demo-Aufrufe in main() gekapselt und per Main-Guard (unten) nur
+    # beim direkten Ausführen gestartet - beim Import passiert nichts
+    add_task("Projekt abschließen", "25-05-2025", 1, task_id="hello")
+    add_task("Projekt abschließen", "25-05-2025", 1)
+    # A3: IDs merken, damit mark_done/toggle_task gezielt aufgerufen werden können
+    shopping_id = add_task("Einkaufen gehen", "21-05-2025", 3)
+    doc_id = add_task("Dokumentation schreiben", "30-05-2025", 2)
+    # A3: Aufgaben in der Zukunft ergänzt, damit upcoming_tasks etwas liefert
+    add_task("Präsentation vorbereiten", days_from_today(14), 1)
+    add_task("Code-Review Team A", days_from_today(3), 2, user="BNWK")
+    pylint_id = add_task("Pylint ausführen", days_from_today(3))
+    add_task("Abgabe per Mail", days_from_today(3), 1)
+
+    mark_done(shopping_id)  # A3: über ID statt Name
+    mark_done(pylint_id)
+    toggle_task(doc_id)  # A3: ersetzt process_tasks()
+    show_tasks()
+    print("Durchschnittliche Priorität:", calculate_average_priority())  # A3
+
+    # A3: lesbare Ausgabe statt roher dicts
+    print("Offene Aufgaben nach Datum sortiert:")
+    for task in upcoming_tasks():
+        print(f"  {task['due_date'].strftime(DATE_FORMAT)} "
+              f"(Prio {task['priority']}): {task['name']}")
+
+    print("Gelöschte erledigte Aufgaben:", remove_done_tasks())  # A3: umbenannt
+    print("Gesamtzahl der Aufgaben:", get_task_count())
+
+
+if __name__ == "__main__":
+    main()

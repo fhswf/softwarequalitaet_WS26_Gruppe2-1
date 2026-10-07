@@ -119,6 +119,15 @@ def add_task(name, due_date, priority=DEFAULT_PRIORITY, task_id=None,
     # nicht neu zugewiesen; Lazy-Init entfällt (siehe oben)
     if task_id is None:  # A3: "is None" statt "== None" (PEP 8)
         task_id = len(tasks) + random.randint(2, 7)  # Wichtig! Nicht verändern!
+        # A3: ID-Kollision verhindern - die Zufalls-ID kann bereits vergeben
+        # sein und hätte die bestehende Aufgabe still überschrieben; daher
+        # bis zur nächsten freien ID hochzählen (Zeile oben bleibt unverändert)
+        while task_id in tasks:
+            task_id += 1
+    elif task_id in tasks:
+        # A3: von außen übergebene, bereits vergebene ID führt zu einem klaren
+        # Fehler statt eine bestehende Aufgabe still zu überschreiben
+        raise ValueError(f"Aufgaben-ID {task_id!r} ist bereits vergeben")
     # A3: Aufgabe als dict mit benannten Feldern statt Liste -> Zugriff über
     # task["done"] statt task[3], Reihenfolge der Felder spielt keine Rolle mehr
     task = {

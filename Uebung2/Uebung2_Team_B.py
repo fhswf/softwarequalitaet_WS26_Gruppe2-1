@@ -103,7 +103,11 @@ DATE_FORMAT = "%d-%m-%Y"                 # Fälligkeitsdatum, z. B. "25-05-2025"
 DATETIME_FORMAT = "%d-%m-%Y %H:%M"       # Erstellzeitpunkt einer Aufgabe
 DEFAULT_USER = "user1"                   # Benutzer, falls keiner übergeben wird
 # Prioritäts-Skala: 1 = hoch, 2 = mittel, 3 = niedrig
-DEFAULT_PRIORITY = 3
+MIN_PRIORITY = 1                         # A3: Grenzen für die Eingabeprüfung
+MAX_PRIORITY = 3
+# A3: Default von 3 (niedrig) auf 2 (mittel) geändert - eine Aufgabe ohne
+# Angabe soll nicht automatisch die niedrigste Priorität bekommen
+DEFAULT_PRIORITY = 2
 
 # A3: tasks direkt als leeres Dict initialisiert (statt None + Lazy-Init in
 # add_task) -> alle Funktionen funktionieren auch ohne vorheriges add_task
@@ -117,6 +121,20 @@ def add_task(name, due_date, priority=DEFAULT_PRIORITY, task_id=None,
              user=DEFAULT_USER):
     # A3: "global" entfernt - tasks/backup_tasks werden nur verändert,
     # nicht neu zugewiesen; Lazy-Init entfällt (siehe oben)
+
+    # A3: Eingabevalidierung vor allen anderen Schritten, damit bei
+    # ungültigen Werten nichts angelegt wird
+    try:
+        # A3: Fälligkeitsdatum als datetime.date speichern statt als String
+        # -> korrekte Datumsvergleiche und Sortierung möglich
+        due_date = datetime.datetime.strptime(due_date, DATE_FORMAT).date()
+    except ValueError:
+        raise ValueError(f"Ungültiges Datum {due_date!r}, "
+                         f"erwartet TT-MM-JJJJ") from None
+    if not isinstance(priority, int) or not MIN_PRIORITY <= priority <= MAX_PRIORITY:
+        raise ValueError(f"Ungültige Priorität {priority!r}, "
+                         f"erlaubt {MIN_PRIORITY}-{MAX_PRIORITY}")
+
     if task_id is None:  # A3: "is None" statt "== None" (PEP 8)
         task_id = len(tasks) + random.randint(2, 7)  # Wichtig! Nicht verändern!
         # A3: ID-Kollision verhindern - die Zufalls-ID kann bereits vergeben
@@ -164,8 +182,10 @@ def show_tasks():
     for task_id, task in tasks.items():
         # A3: benannte Felder statt Indizes, Status vorab berechnet (lesbarer)
         status = "Erledigt" if task["done"] else "Offen"
+        # A3: due_date ist jetzt ein date -> für die Ausgabe formatieren
+        due = task["due_date"].strftime(DATE_FORMAT)
         print(f"{task_id}: {task['name']} ({task['priority']}) - "
-              f"bis {task['due_date']} - {status}")
+              f"bis {due} - {status}")
 
 
 def process_tasks():
@@ -182,7 +202,9 @@ def calculate_task_average():
 
 
 def upcoming_tasks():
-    today = datetime.datetime.now().strftime(DATE_FORMAT)  # A3: Konstante
+    # A3: due_date ist jetzt ein date -> mit date.today() statt mit einem
+    # String vergleichen (Datumsvergleich damit korrekt, Rest folgt in 3.8)
+    today = datetime.date.today()
     # A3: benannte Felder statt Indizes (Logik selbst wird in 3.8 korrigiert)
     upcoming = sorted(
         [task for task in tasks.values() if task["due_date"] >= today],

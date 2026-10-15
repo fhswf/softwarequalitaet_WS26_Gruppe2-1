@@ -1,5 +1,5 @@
 """
-Teilnehmer: CSKK, BNWK, NSBG, VRGA
+Teilnehmer: CSKK, BNWK
 
 Aufgabe 1 – Funktionen des Codes:
 Einfache Aufgabenverwaltung (To-do-Liste) im Speicher:

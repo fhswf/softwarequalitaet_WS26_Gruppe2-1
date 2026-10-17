@@ -5,6 +5,7 @@ TODO: Implementieren Sie die Konto-Klasse basierend auf dem KontoInterface
 """
 
 
+
 from decimal import Decimal
 from .interfaces import KontoInterface
 

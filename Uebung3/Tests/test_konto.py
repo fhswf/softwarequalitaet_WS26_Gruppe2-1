@@ -1,3 +1,5 @@
+# VRGA, NSBG
+
 """
 Test-Template für die Konto-Klasse (Test-After Approach)
 ========================================================
@@ -21,99 +23,125 @@ import pytest
 from decimal import Decimal
 
 # TODO: Team A - Entkommentiert nach eurer Implementierung:
-# from ..Code.konto import Konto
+from ..Code.konto import Konto
 
 
 class TestKontoErstellung:
     """
     Tests für die Konto-Erstellung
-    TODO: Team A - Implementieren Sie Tests für den Konstruktor
     """
 
-    def test_placeholder_konto_erstellung(self):
-        """
-        Placeholder-Test - ersetzen Sie diesen durch echte Tests!
+    def test_konto_mit_id_und_saldo(self):
+        # Konto mit ID 1 und 100€ anlegen
+        konto = Konto(1, Decimal("100.00"))
 
-        Beispiele für Tests, die Sie schreiben könnten:
-        - Konto mit gültiger ID und positivem Saldo erstellen
-        - Konto mit gültiger ID und Saldo 0 erstellen  
-        - Konto mit ungültiger ID (negativ, 0, String) → Exception?
-        - Konto mit ungültigem Saldo (negativ, String) → Exception?
-        """
-        # TODO: Team A - Ersetzen Sie diesen Placeholder durch echte Tests
-        assert True, "Placeholder - bitte durch echte Tests ersetzen!"
+        # Stimmen ID und Saldo?
+        assert konto.konto_id == 1
+        assert konto.saldo == Decimal("100.00")
 
-        # Beispiel-Code (entkommentiert nach Implementierung):
-        # konto = Konto(1, Decimal("100.00"))
-        # assert konto.konto_id == 1
-        # assert konto.saldo == Decimal("100.00")
+
+    def test_negativer_startsaldo_wirft_fehler(self):
+        # Ein Konto mit -10€ darf nicht erstellt werden
+        with pytest.raises(ValueError):
+            Konto(1, Decimal("-10.00"))  
+    
+    def test_id_als_text_wirft_fehler(self):
+        # Ein Konto mit Text als ID darf nicht erstellt werden
+        with pytest.raises(ValueError):
+            Konto("abc", Decimal("10.00"))            
+
+
 
 
 class TestKontoEigenschaften:
     """
     Tests für Konto-Eigenschaften (Properties)
-    TODO: Team A - Testet konto_id und saldo Properties
     """
 
-    def test_placeholder_eigenschaften(self):
-        """TODO: Team A - Tests für Properties"""
-        # Beispiel-Tests:
-        # - konto.konto_id gibt korrekte ID zurück
-        # - konto.saldo gibt korrekten Saldo zurück
-        # - Properties sind read-only (falls gewünscht)
-        assert True, "TODO: Tests für Eigenschaften implementieren"
+    def test_saldo_ist_lesbar(self):
+        konto = Konto(1, Decimal("100.00"))
+        assert konto.saldo == Decimal("100.00")
+
+    def test_saldo_kann_nicht_ueberschrieben_werden(self):
+        konto = Konto(1, Decimal("100.00"))
+
+        # Saldo manuell setzen ist nicht erlaubt
+        with pytest.raises(AttributeError):
+            konto.saldo = Decimal("1000.00")
+
+    def test_ID_kann_nicht_ueberschrieben_werden(self):
+        konto = Konto(1, Decimal("100.00"))
+
+        # ID manuell setzen ist nicht erlaubt
+        with pytest.raises(AttributeError):
+            konto.konto_id = 99
+
 
 
 class TestEinzahlung:
     """
     Tests für die Einzahlungs-Funktionalität
-    TODO: Team A - Testet alle Einzahlungs-Szenarien
     """
 
-    def test_placeholder_einzahlung(self):
-        """TODO: Team A - Tests für einzahlen() Methode"""
-        # Beispiel-Tests:
-        # - Einzahlung von positivem Betrag
-        # - Saldo wird korrekt erhöht
-        # - Einzahlung von 0 → Exception?
-        # - Einzahlung von negativem Betrag → Exception?
-        # - Einzahlung von ungültigem Typ → Exception?
-        assert True, "TODO: Tests für Einzahlung implementieren"
+    def test_einzahlung_erhoeht_saldo(self):
+        # Konto mit 100€ anlegen
+        konto = Konto(1,Decimal("100.00"))
 
+        # 50€ einzahlen
+        konto.einzahlen(Decimal("50.00"))
+
+        #es sollten 150€ drauf sein
+        assert konto.saldo == Decimal("150.00")
+
+    def test_einzahlung_null_wirft_fehler(self):
+        # Konto anlegen
+        konto = Konto(1, Decimal("100.00"))
+        # 0€ einzahlen muss einen Fehler auslösen
+        with pytest.raises(ValueError):
+            konto.einzahlen(Decimal("0.00"))
 
 class TestAuszahlung:
     """
-    Tests für die Auszahlungs-Funktionalität  
-    TODO: Team A - Testet alle Auszahlungs-Szenarien
+    Tests für die Auszahlungs-Funktionalität 
     """
 
-    def test_placeholder_auszahlung(self):
-        """TODO: Team A - Tests für auszahlen() Methode"""
-        # Beispiel-Tests:
-        # - Auszahlung bei ausreichendem Saldo
-        # - Saldo wird korrekt reduziert
-        # - Auszahlung bei unzureichendem Saldo → Exception?
-        # - Auszahlung von 0 → Exception?
-        # - Auszahlung von negativem Betrag → Exception?
-        # - Überziehung vermeiden
-        assert True, "TODO: Tests für Auszahlung implementieren"
+    def test_auszahlung_senkt_saldo(self):
+       
+        # Konto mit 100€ anlegen
+        konto = Konto(1, Decimal("100.00"))
 
+        # 50€ auszahlen
+        konto.auszahlen(Decimal("50.00"))
+
+        # Es sollten 50€ drauf sein
+        assert konto.saldo == Decimal("50.00")
+
+    def test_auszahlung_ins_negative_wirft_fehler(self):
+        # Konto anlegen
+        konto = Konto(1, Decimal("100.00"))
+        # 150€ auszahlen muss einen Fehler auslösen, da weniger auf dem Konto ist
+        with pytest.raises(RuntimeError):
+            konto.auszahlen(Decimal("150.00"))
 
 class TestKontoGrenzfaelle:
     """
     Tests für Grenzfälle und Besonderheiten
-    TODO: Team A - Testet Edge Cases und besondere Situationen
     """
 
-    def test_placeholder_grenzfaelle(self):
-        """TODO: Team A - Tests für Grenzfälle"""
-        # Beispiel-Tests:
-        # - Sehr große Beträge
-        # - Sehr kleine Beträge (Cent-Bereich)
-        # - Decimal-Präzision
-        # - String-Repräsentation (__str__, __repr__)
-        # - Gleichheit von Konten
-        assert True, "TODO: Tests für Grenzfälle implementieren"
+    def test_kompletten_saldo_abheben(self):
+        konto = Konto(1, Decimal("100.00"))
+
+        # Genau alles abheben ist erlaubt -> Saldo wird 0
+        konto.auszahlen(Decimal("100.00"))
+
+        assert konto.saldo == Decimal("0.00")
+
+    def test_ein_cent_zu_viel_abheben(self):
+        konto = Konto(1, Decimal("100.00"))
+
+        # 1 Cent mehr als vorhanden -> Konto wäre im Minus -> Fehler
+        with pytest.raises(RuntimeError):
+            konto.auszahlen(Decimal("100.01"))
 
 
 # TODO: Team A - Erweitern Sie diese Klassen oder fügen Sie neue hinzu!

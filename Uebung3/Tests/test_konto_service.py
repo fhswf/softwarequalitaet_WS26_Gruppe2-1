@@ -1,4 +1,4 @@
-# Implementiert von: CSKK, BNWK, VRGA, NSBG
+# Implementiert von: CSKK, BNWK
 
 """
 Tests für die KontoService-Klasse

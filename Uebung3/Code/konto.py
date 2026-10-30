@@ -1,18 +1,15 @@
+# Implementiert von: VRGA, NSBG
+
 """
-Hier sollen Sie Ihre Implementierung der Konto-Klasse erstellen.
-
-TODO: Implementieren Sie die Konto-Klasse basierend auf dem KontoInterface
+Implementierung der Konto-Klasse
 """
-
-
 
 from decimal import Decimal
 from .interfaces import KontoInterface
 
+
 class Konto(KontoInterface):
     """
-    TODO: Implementieren Sie diese Klasse
-
     Regeln:
     - ID wird bei Erstellung mitgegeben (numerisch, darf nicht leer sein)
     - Konto darf nicht überzogen werden (Saldo < 0)

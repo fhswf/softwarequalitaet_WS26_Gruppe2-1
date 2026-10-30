@@ -31,6 +31,7 @@
                 "mintlify.document"
             ],
             "settings": {
+                "chat.disableAIFeatures": true,
                 "python.defaultInterpreterPath": "/usr/local/bin/python",
                 "python.linting.enabled": true,
                 "python.linting.pylintEnabled": true,
@@ -40,9 +41,8 @@
                 "python.testing.pytestArgs": [
                     "."
                 ],
-                "typescript.preferences.includePackageJsonAutoImports": "on",
-                "typescript.suggest.autoImports": true,
-                "javascript.suggest.autoImports": true,
+                "js/ts.preferences.includePackageJsonAutoImports": "on",
+                "js/ts.suggest.autoImports": true,
                 "editor.formatOnSave": true,
                 "editor.codeActionsOnSave": {
                     "source.organizeImports": "explicit"

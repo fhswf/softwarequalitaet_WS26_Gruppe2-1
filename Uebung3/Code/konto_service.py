@@ -7,20 +7,12 @@ KontoService-Klasse basierend auf dem KontoServiceInterface
 from decimal import Decimal
 from typing import List, Dict
 from .interfaces import KontoServiceInterface, KontoInterface
-
-
-# TODO: Team B - Später ersetzt ihr diesen Import durch Team A's Implementation:
-# from .konto import Konto
+from .konto import Konto
 
 
 class KontoService(KontoServiceInterface):
     """
     Verwaltet Konten und führt Transaktionen zwischen ihnen aus.
-
-    HINWEIS für Team B - Parallele Entwicklung:
-    - Arbeiten Sie mit dem KontoInterface, nicht der konkreten Konto-Klasse
-    - Nutzen Sie die _create_konto() Factory-Methode für Konto-Erstellung
-    - So können Sie sofort anfangen, ohne auf Team A zu warten!
 
     Funktionalitäten:
     - Konten verwalten (als List[KontoInterface])
@@ -34,43 +26,8 @@ class KontoService(KontoServiceInterface):
         self._konten: List[KontoInterface] = []
 
     def _create_konto(self, konto_id: int, saldo: Decimal) -> KontoInterface:
-        """
-        Factory-Methode für Konto-Erstellung - ermöglicht parallele Entwicklung!
-
-        TODO: Team B - STARTEN SIE HIER! Diese Methode gibt Ihnen EXTREM EINFACHE Dummy-Objekte.
-
-        JETZT: Verwenden Sie diese Dummy-Implementation für Ihre Service-Entwicklung
-        SPÄTER: Ersetzen Sie durch `return Konto(konto_id, saldo)` wenn Team A fertig ist
-
-        WICHTIG: Diese Dummy-Implementation macht fast NICHTS - das ist Absicht!
-        Bei der Integration werden Sie Probleme entdecken, die Sie dann gemeinsam lösen.
-        """
-
-        # EXTREM EINFACHE DUMMY-IMPLEMENTATION für Team B:
-        # Macht fast nichts, gibt nur konstante Werte zurück!
-        class DummyKonto:
-            def __init__(self, konto_id: int, saldo: Decimal):
-                # Speichert die Werte, aber macht keine Validierung!
-                pass
-
-            @property
-            def konto_id(self) -> int:
-                return 1  # ← Immer konstant 1!
-
-            @property
-            def saldo(self) -> Decimal:
-                return Decimal("100.00")  # ← Immer konstant 100!
-
-            def einzahlen(self, betrag: Decimal) -> None:
-                pass  # ← Macht nichts!
-
-            def auszahlen(self, betrag: Decimal) -> None:
-                pass  # ← Macht nichts, wirft keine Fehler!
-
-        return DummyKonto(konto_id, saldo)
-
-        # TODO: Team B - Später ersetzen Sie die obige Dummy-Implementation durch:
-        # return Konto(konto_id, saldo)
+        """Factory-Methode für Konto-Erstellung."""
+        return Konto(konto_id, saldo)
 
     @staticmethod
     def _decimal_pruefen(wert: Decimal, name: str) -> None:

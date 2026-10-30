@@ -286,3 +286,83 @@ class TestUtilityFunktionen:
 
 class TestKontoServiceIntegration:
     """Integration-Tests zwischen Service und Konto-Klassen"""
+
+    def setup_method(self):
+        self.service = KontoService()
+        self.konto_a = self.service.konto_erstellen(Decimal("100.00"))
+        self.konto_b = self.service.konto_erstellen(Decimal("50.00"))
+
+    def test_ueberweisung_ueber_saldo_wirft_runtime_error(self):
+        # Act & Assert
+        with pytest.raises(RuntimeError, match="überzogen"):
+            self.service.ueberweisen(self.konto_a, self.konto_b, Decimal("100.01"))
+
+    def test_einzug_ueber_saldo_wirft_runtime_error(self):
+        # Act & Assert
+        with pytest.raises(RuntimeError, match="überzogen"):
+            self.service.einziehen(self.konto_a, self.konto_b, Decimal("100.01"))
+
+    def test_ueberweisung_des_gesamten_saldos_ist_erlaubt(self):
+        # Act
+        self.service.ueberweisen(self.konto_a, self.konto_b, Decimal("100.00"))
+
+        # Assert
+        assert saldo_von(self.service, self.konto_a) == Decimal("0.00")
+        assert saldo_von(self.service, self.konto_b) == Decimal("150.00")
+
+    def test_ueberzogene_ueberweisung_aendert_keine_salden(self):
+        # Act
+        with pytest.raises(RuntimeError):
+            self.service.ueberweisen(self.konto_a, self.konto_b, Decimal("100.01"))
+
+        # Assert
+        assert saldo_von(self.service, self.konto_a) == Decimal("100.00")
+        assert saldo_von(self.service, self.konto_b) == Decimal("50.00")
+
+    def test_ueberzogener_einzug_aendert_keine_salden(self):
+        # Act
+        with pytest.raises(RuntimeError):
+            self.service.einziehen(self.konto_a, self.konto_b, Decimal("100.01"))
+
+        # Assert
+        assert saldo_von(self.service, self.konto_a) == Decimal("100.00")
+        assert saldo_von(self.service, self.konto_b) == Decimal("50.00")
+
+    def test_ueberweisung_an_unbekanntes_konto_aendert_saldo_nicht(self):
+        # Act
+        with pytest.raises(ValueError):
+            self.service.ueberweisen(self.konto_a, 99, Decimal("10.00"))
+
+        # Assert
+        assert saldo_von(self.service, self.konto_a) == Decimal("100.00")
+
+    def test_ueberweisung_mit_ungueltigem_betrag_aendert_keine_salden(self):
+        # Act
+        with pytest.raises(ValueError):
+            self.service.ueberweisen(self.konto_a, self.konto_b, Decimal("-10.00"))
+
+        # Assert
+        assert saldo_von(self.service, self.konto_a) == Decimal("100.00")
+        assert saldo_von(self.service, self.konto_b) == Decimal("50.00")
+
+    def test_vollstaendiger_workflow(self):
+        # Arrange
+        service = KontoService()
+        konto_1 = service.konto_erstellen(Decimal("200.00"))
+        konto_2 = service.konto_erstellen(Decimal("50.00"))
+        konto_3 = service.konto_erstellen()
+
+        # Act
+        service.ueberweisen(konto_1, konto_2, Decimal("75.50"))
+        service.einziehen(konto_2, konto_3, Decimal("25.25"))
+        with pytest.raises(RuntimeError):
+            service.ueberweisen(konto_3, konto_1, Decimal("25.26"))
+
+        # Assert
+        assert service.konten_auflisten() == [
+            {"konto_id": 1, "saldo": Decimal("124.50")},
+            {"konto_id": 2, "saldo": Decimal("100.25")},
+            {"konto_id": 3, "saldo": Decimal("25.25")},
+        ]
+        assert service.get_max_konto_id() == 3
+        assert service.gesamtsaldo_berechnen() == Decimal("250.00")

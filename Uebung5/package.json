@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:ui:codespaces": "playwright test --ui --ui-host=0.0.0.0",
+    "test:debug": "playwright test --debug",
+    "codegen": "playwright codegen",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^24.10.1"
+  }
+}
